@@ -74,11 +74,21 @@ QMargins AdwaitaDecoration::margins() const
 
 void AdwaitaDecoration::paint(QPaintDevice *device)
 {
-	QRect surfaceRect(QPoint(), window()->frameGeometry().size());
+	QRect surface_rect(QPoint(), window()->frameGeometry().size());
 	QRect titlebar_rect(
 	    margins().left() - 1, 0,
-	    surfaceRect.width() - (margins().left() - 1) - (margins().right() - 1),
+	    surface_rect.width() - (margins().left() - 1) - (margins().right() - 1),
 	    margins().top());
+	QRect left_border_rect(
+	    0, titlebar_rect.height(), margins().left(),
+	    surface_rect.height() - titlebar_rect.height() - margins().bottom());
+	QRect right_border_rect(
+	    surface_rect.width() - margins().right(), titlebar_rect.height(),
+	    margins().right(),
+	    surface_rect.height() - titlebar_rect.height() - margins().bottom());
+	QRect bottom_border_rect(titlebar_rect.x(),
+	                         surface_rect.height() - margins().bottom(),
+	                         titlebar_rect.width(), margins().bottom());
 
 	QPainter painter(device);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -87,8 +97,16 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 	                       titlebar_rect);
 	m_style.drawTitle(&painter, DecorationStyle::Mode::ACTIVE, titlebar_rect,
 	                  window()->title());
-	m_style.drawCloseButton(&painter, DecorationStyle::Mode::HOVER,
+	m_style.drawCloseButton(&painter, DecorationStyle::Mode::ACTIVE,
 	                        titlebar_rect);
+	// painter.restore();
+	m_style.drawLeftBorder(&painter, DecorationStyle::Mode::ACTIVE,
+	                       left_border_rect);
+	m_style.drawRightBorder(&painter, DecorationStyle::Mode::ACTIVE,
+	                        right_border_rect);
+
+	m_style.drawBottomBorder(&painter, DecorationStyle::Mode::ACTIVE,
+	                         bottom_border_rect);
 }
 
 bool AdwaitaDecoration::clickButton(Qt::MouseButtons b, Button btn)

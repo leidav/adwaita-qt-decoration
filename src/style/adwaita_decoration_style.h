@@ -56,6 +56,13 @@ public:
 	                     const QRect &rect) override;
 	void drawShadow(QPainter *painter, Mode mode, const QRect &rect) override;
 
+	void drawLeftBorder(QPainter *painter, Mode mode,
+	                    const QRect &rect) override;
+	void drawRightBorder(QPainter *painter, Mode mode,
+	                     const QRect &rect) override;
+	void drawBottomBorder(QPainter *painter, Mode mode,
+	                      const QRect &rect) override;
+
 private:
 	void updateGradient(const QRect &rect);
 	int buttonSize(const QRect &rect) const;

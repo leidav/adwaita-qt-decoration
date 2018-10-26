@@ -25,6 +25,12 @@ public:
 
 	virtual void drawShadow(QPainter *painter, Mode mode,
 	                        const QRect &rect) = 0;
+	virtual void drawLeftBorder(QPainter *painter, Mode mode,
+	                            const QRect &rect) = 0;
+	virtual void drawRightBorder(QPainter *painter, Mode mode,
+	                             const QRect &rect) = 0;
+	virtual void drawBottomBorder(QPainter *painter, Mode mode,
+	                              const QRect &rect) = 0;
 };
 
-#endif  // DECORATIONSTYLE_H
+#endif
