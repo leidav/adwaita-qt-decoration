@@ -69,7 +69,13 @@ QRectF AdwaitaDecoration::minimizeButtonRect() const
 
 QMargins AdwaitaDecoration::margins() const
 {
-	return QMargins(3, m_style.height(), 3, 3);
+	int margin;
+	if (waylandWindow()->isMaximized()) {
+		margin = 0;
+	} else {
+		margin = 3;
+	}
+	return QMargins(margin, m_style.height(), margin, margin);
 }
 
 void AdwaitaDecoration::paint(QPaintDevice *device)
@@ -90,79 +96,115 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 	                         surface_rect.height() - margins().bottom(),
 	                         titlebar_rect.width(), margins().bottom());
 
+	auto mode = DecorationStyle::State::INACTIVE;
+
+	if (window()->isActive()) {
+		mode = DecorationStyle::State::ACTIVE;
+	}
+
 	QPainter painter(device);
 	painter.setRenderHint(QPainter::Antialiasing);
 
-	m_style.drawBackground(&painter, DecorationStyle::Mode::ACTIVE,
-	                       titlebar_rect);
-	m_style.drawTitle(&painter, DecorationStyle::Mode::ACTIVE, titlebar_rect,
-	                  window()->title());
-	m_style.drawCloseButton(&painter, DecorationStyle::Mode::ACTIVE,
-	                        titlebar_rect);
-	// painter.restore();
-	m_style.drawLeftBorder(&painter, DecorationStyle::Mode::ACTIVE,
-	                       left_border_rect);
-	m_style.drawRightBorder(&painter, DecorationStyle::Mode::ACTIVE,
-	                        right_border_rect);
+	m_style.drawBackground(&painter, mode, titlebar_rect);
+	m_style.drawTitle(&painter, mode, titlebar_rect, window()->title());
 
-	m_style.drawBottomBorder(&painter, DecorationStyle::Mode::ACTIVE,
-	                         bottom_border_rect);
+	auto button_mode = DecorationStyle::State::ACTIVE;
+	if (mode == DecorationStyle::State::ACTIVE) {
+		if (m_hover == Close) {
+			button_mode = DecorationStyle::State::HOVER;
+		}
+		if (m_clicking == Close) {
+			button_mode = DecorationStyle::State::PRESS;
+		}
+	} else {
+		button_mode = DecorationStyle::State::INACTIVE;
+	}
+
+	m_style.drawCloseButton(&painter, button_mode, titlebar_rect);
+
+	m_style.drawLeftBorder(&painter, mode, left_border_rect);
+	m_style.drawRightBorder(&painter, mode, right_border_rect);
+	m_style.drawBottomBorder(&painter, mode, bottom_border_rect);
 }
 
 bool AdwaitaDecoration::clickButton(Qt::MouseButtons b, Button btn)
 {
+	bool release = false;
 	if (isLeftClicked(b)) {
 		m_clicking = btn;
-		return false;
 	} else if (isLeftReleased(b)) {
 		if (m_clicking == btn) {
 			m_clicking = None;
-			return true;
+			release = true;
 		} else {
 			m_clicking = None;
 		}
+	} else {
+		m_hover = btn;
 	}
-	return false;
+	return release;
 }
 
 bool AdwaitaDecoration::handleMouse(QWaylandInputDevice *inputDevice,
                                     const QPointF &local, const QPointF &global,
                                     Qt::MouseButtons b,
                                     Qt::KeyboardModifiers mods)
-
 {
 	Q_UNUSED(global);
 
+	bool handled = false;
 	// Figure out what area mouse is in
 	if (closeButtonRect().contains(local)) {
-		if (clickButton(b, Close))
+		if (clickButton(b, Close)) {
 			QWindowSystemInterface::handleCloseEvent(window());
+		}
+		handled = true;
 	} else if (maximizeButtonRect().contains(local)) {
-		if (clickButton(b, Maximize))
+		if (clickButton(b, Maximize)) {
 			window()->setWindowState(waylandWindow()->isMaximized()
 			                             ? Qt::WindowNoState
 			                             : Qt::WindowMaximized);
+		}
+		handled = true;
 	} else if (minimizeButtonRect().contains(local)) {
-		if (clickButton(b, Minimize))
+		if (clickButton(b, Minimize)) {
 			window()->setWindowState(Qt::WindowMinimized);
+		}
+		handled = true;
+		m_hover = None;
+		m_clicking = None;
 	} else if (local.y() <= margins().top()) {
 		processMouseTop(inputDevice, local, b, mods);
+		handled = true;
+		m_hover = None;
+		m_clicking = None;
 	} else if (local.y() > window()->height() + margins().top()) {
 		processMouseBottom(inputDevice, local, b, mods);
+		handled = true;
+		m_hover = None;
+		m_clicking = None;
 	} else if (local.x() <= margins().left()) {
 		processMouseLeft(inputDevice, local, b, mods);
+		handled = true;
+		m_hover = None;
+		m_clicking = None;
 	} else if (local.x() > window()->width() + margins().left()) {
 		processMouseRight(inputDevice, local, b, mods);
+		handled = true;
+		m_hover = None;
+		m_clicking = None;
 	} else {
 #if QT_CONFIG(cursor)
 		waylandWindow()->restoreMouseCursor(inputDevice);
 #endif
-		setMouseButtons(b);
-		return false;
+		m_hover = None;
+		m_clicking = None;
 	}
 
 	setMouseButtons(b);
-	return true;
+	update();
+	waylandWindow()->requestUpdate();
+	return handled;
 }
 
 bool AdwaitaDecoration::handleTouch(QWaylandInputDevice *inputDevice,
@@ -188,7 +230,6 @@ bool AdwaitaDecoration::handleTouch(QWaylandInputDevice *inputDevice,
 		else
 			handled = false;
 	}
-
 	return handled;
 }
 

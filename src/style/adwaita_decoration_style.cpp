@@ -39,12 +39,12 @@ QRect AdwaitaDecorationStyle::closeButtonRect(const QRect &rect) const
 	             rect.height() - 1 - size - button_padding, size, size);
 }
 
-void AdwaitaDecorationStyle::drawBackground(QPainter *painter, Mode mode,
+void AdwaitaDecorationStyle::drawBackground(QPainter *painter, State mode,
                                             const QRect &rect)
 {
 	painter->save();
 	updateGradient(rect);
-	if (mode == Mode::ACTIVE) {
+	if (mode == State::ACTIVE) {
 		QLinearGradient gradient(0, 1, 0, rect.height() - 1);
 		gradient.setStops(m_gradient_stops);
 		painter->setPen(border_color);
@@ -60,7 +60,7 @@ void AdwaitaDecorationStyle::drawBackground(QPainter *painter, Mode mode,
 	painter->setClipRect(rect);
 	painter->drawRoundedRect(titlebar_rect, titlebar_border_radius,
 	                         titlebar_border_radius, Qt::AbsoluteSize);
-	if (mode == Mode::ACTIVE) {
+	if (mode == State::ACTIVE) {
 		painter->setPen(bottom_line_color);
 	} else {
 		painter->setPen(bottom_line_inactive_color);
@@ -75,11 +75,11 @@ void AdwaitaDecorationStyle::drawBackground(QPainter *painter, Mode mode,
 	painter->restore();
 }
 
-void AdwaitaDecorationStyle::drawTitle(QPainter *painter, Mode mode,
+void AdwaitaDecorationStyle::drawTitle(QPainter *painter, State mode,
                                        const QRect &rect, QString title)
 {
 	painter->save();
-	if (mode == Mode::ACTIVE) {
+	if (mode == State::ACTIVE) {
 		painter->setPen(text_color);
 	} else {
 		painter->setPen(text_inactive_color);
@@ -89,13 +89,13 @@ void AdwaitaDecorationStyle::drawTitle(QPainter *painter, Mode mode,
 	painter->restore();
 }
 
-void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, Mode mode,
+void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, State mode,
                                              const QRect &rect)
 {
 	painter->save();
 	QRectF button_rect = closeButtonRect(rect);
 	button_rect.adjust(0.5, 0.5, -0.5, -0.5);
-	if (mode == Mode::HOVER) {
+	if (mode == State::HOVER) {
 		QLinearGradient gradient(0, button_rect.y(), 0,
 		                         button_rect.y() + button_rect.height());
 		gradient.setStops(m_button_gradient_stops);
@@ -103,7 +103,7 @@ void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, Mode mode,
 		painter->setPen(QColor(0xb7b7b4));
 		painter->drawRoundedRect(button_rect, button_border_radius,
 		                         button_border_radius, Qt::AbsoluteSize);
-	} else if (mode == Mode::PRESS) {
+	} else if (mode == State::PRESS) {
 		painter->setBrush(QColor(button_press_color));
 		painter->setPen(QColor(0xb7b7b4));
 		painter->drawRoundedRect(button_rect, button_border_radius,
@@ -114,7 +114,7 @@ void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, Mode mode,
 	QRect icon_rect(button_rect.x() + size / 2 - 8,
 	                button_rect.y() + size / 2 - 8, 16, 16);
 
-	if (mode == Mode::INACTIVE) {
+	if (mode == State::INACTIVE) {
 		m_close_button_icon.paint(painter, icon_rect, Qt::AlignCenter,
 		                          QIcon::Disabled, QIcon::On);
 	} else {
@@ -125,7 +125,7 @@ void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, Mode mode,
 }
 
 void AdwaitaDecorationStyle::drawShadow(QPainter *painter,
-                                        DecorationStyle::Mode mode,
+                                        DecorationStyle::State mode,
                                         const QRect &rect)
 {
 	painter->save();
@@ -137,7 +137,7 @@ void AdwaitaDecorationStyle::drawShadow(QPainter *painter,
 }
 
 void AdwaitaDecorationStyle::drawLeftBorder(QPainter *painter,
-                                            DecorationStyle::Mode mode,
+                                            DecorationStyle::State mode,
                                             const QRect &rect)
 {
 	painter->save();
@@ -150,7 +150,7 @@ void AdwaitaDecorationStyle::drawLeftBorder(QPainter *painter,
 }
 
 void AdwaitaDecorationStyle::drawRightBorder(QPainter *painter,
-                                             DecorationStyle::Mode mode,
+                                             DecorationStyle::State mode,
                                              const QRect &rect)
 {
 	painter->save();
@@ -162,7 +162,7 @@ void AdwaitaDecorationStyle::drawRightBorder(QPainter *painter,
 }
 
 void AdwaitaDecorationStyle::drawBottomBorder(QPainter *painter,
-                                              DecorationStyle::Mode mode,
+                                              DecorationStyle::State mode,
                                               const QRect &rect)
 {
 	painter->save();

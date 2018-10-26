@@ -90,6 +90,7 @@ private:
 	QRectF minimizeButtonRect() const;
 
 	Button m_clicking = None;
+	Button m_hover = None;
 	AdwaitaDecorationStyle m_style;
 };
 };  // namespace QtWaylandClient

@@ -21,9 +21,9 @@ HeaderBar::HeaderBar(DecorationStyle *style, QWidget *parent)
 
 void HeaderBar::paintEvent(QPaintEvent *event)
 {
-	auto mode = DecorationStyle::Mode::INACTIVE;
+	auto mode = DecorationStyle::State::INACTIVE;
 	if (window()->isActiveWindow()) {
-		mode = DecorationStyle::Mode::ACTIVE;
+		mode = DecorationStyle::State::ACTIVE;
 	}
 
 	QPainter painter(this);
@@ -31,12 +31,12 @@ void HeaderBar::paintEvent(QPaintEvent *event)
 	QRect rect(0, 0, geometry().width(), geometry().height());
 	m_style->drawBackground(&painter, mode, rect);
 	m_style->drawTitle(&painter, mode, rect, "TitleBar");
-	if (mode == DecorationStyle::Mode::ACTIVE) {
+	if (mode == DecorationStyle::State::ACTIVE) {
 		if (m_button_press) {
-			mode = DecorationStyle::Mode::PRESS;
+			mode = DecorationStyle::State::PRESS;
 
 		} else if (m_button_hover) {
-			mode = DecorationStyle::Mode::HOVER;
+			mode = DecorationStyle::State::HOVER;
 		}
 	}
 	m_style->drawCloseButton(&painter, mode, rect);

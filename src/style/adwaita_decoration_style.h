@@ -47,20 +47,20 @@ public:
 
 	QRect closeButtonRect(const QRect &titlebar_rect) const override;
 
-	void drawBackground(QPainter *painter, Mode mode,
+	void drawBackground(QPainter *painter, State mode,
 	                    const QRect &rect) override;
 
-	void drawTitle(QPainter *painter, Mode mode, const QRect &rect,
+	void drawTitle(QPainter *painter, State mode, const QRect &rect,
 	               QString title) override;
-	void drawCloseButton(QPainter *painter, Mode mode,
+	void drawCloseButton(QPainter *painter, State mode,
 	                     const QRect &rect) override;
-	void drawShadow(QPainter *painter, Mode mode, const QRect &rect) override;
+	void drawShadow(QPainter *painter, State mode, const QRect &rect) override;
 
-	void drawLeftBorder(QPainter *painter, Mode mode,
+	void drawLeftBorder(QPainter *painter, State mode,
 	                    const QRect &rect) override;
-	void drawRightBorder(QPainter *painter, Mode mode,
+	void drawRightBorder(QPainter *painter, State mode,
 	                     const QRect &rect) override;
-	void drawBottomBorder(QPainter *painter, Mode mode,
+	void drawBottomBorder(QPainter *painter, State mode,
 	                      const QRect &rect) override;
 
 private:
