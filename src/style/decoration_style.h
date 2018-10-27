@@ -15,6 +15,10 @@ public:
 
 	virtual QRect closeButtonRect(const QRect &titlebar_rect) const = 0;
 
+	virtual QRect maximizeButtonRect(const QRect &titlebar_rect) const = 0;
+
+	virtual QRect minimizeButtonRect(const QRect &titlebar_rect) const = 0;
+
 	virtual void drawBackground(QPainter *painter, State mode,
 	                            const QRect &rect) = 0;
 
@@ -22,6 +26,10 @@ public:
 	                       QString title) = 0;
 	virtual void drawCloseButton(QPainter *painter, State mode,
 	                             const QRect &rect) = 0;
+	virtual void drawMaximizeButton(QPainter *painter, State mode,
+	                                const QRect &rect) = 0;
+	virtual void drawMinimizeButton(QPainter *painter, State mode,
+	                                const QRect &rect) = 0;
 
 	virtual void drawShadow(QPainter *painter, State mode,
 	                        const QRect &rect) = 0;

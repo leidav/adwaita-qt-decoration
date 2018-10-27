@@ -47,13 +47,23 @@ public:
 
 	QRect closeButtonRect(const QRect &titlebar_rect) const override;
 
+	QRect maximizeButtonRect(const QRect &titlebar_rect) const override;
+
+	QRect minimizeButtonRect(const QRect &titlebar_rect) const override;
+
 	void drawBackground(QPainter *painter, State mode,
 	                    const QRect &rect) override;
 
 	void drawTitle(QPainter *painter, State mode, const QRect &rect,
 	               QString title) override;
+
 	void drawCloseButton(QPainter *painter, State mode,
 	                     const QRect &rect) override;
+	void drawMaximizeButton(QPainter *painter, State mode,
+	                        const QRect &rect) override;
+	void drawMinimizeButton(QPainter *painter, State mode,
+	                        const QRect &rect) override;
+
 	void drawShadow(QPainter *painter, State mode, const QRect &rect) override;
 
 	void drawLeftBorder(QPainter *painter, State mode,
@@ -64,14 +74,22 @@ public:
 	                      const QRect &rect) override;
 
 private:
+	void drawButtonBackground(QPainter *painter, State mode,
+	                          const QRectF &button_rect);
+	void drawButtonIcon(QPainter *painter, State mode,
+	                    const QRectF &button_rect, QIcon &icon);
+
 	void updateGradient(const QRect &rect);
-	int buttonSize(const QRect &rect) const;
+	int buttonSize(const QRect &titlebar_rect) const;
+
 	int m_height;
 	QRect m_buttonRect;
 	QFont m_font;
 	QGradientStops m_gradient_stops;
 	QGradientStops m_button_gradient_stops;
 	QIcon m_close_button_icon;
+	QIcon m_minimize_button_icon;
+	QIcon m_maximize_button_icon;
 };
 
 #endif  // ADWAITADECORATIONSTYLE_H

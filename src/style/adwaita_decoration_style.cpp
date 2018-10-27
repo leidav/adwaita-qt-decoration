@@ -9,6 +9,9 @@ AdwaitaDecorationStyle::AdwaitaDecorationStyle()
 {
 	QIcon::setThemeName("Adwaita");
 	m_close_button_icon = QIcon::fromTheme("window-close-symbolic");
+	m_minimize_button_icon = QIcon::fromTheme("window-minimize-symbolic");
+	m_maximize_button_icon = QIcon::fromTheme("window-maximize-symbolic");
+
 	m_gradient_stops.append(QGradientStop(0.0, headerbar_color));
 	m_gradient_stops.append(QGradientStop(0.9, headerbar_color));
 	m_gradient_stops.append(QGradientStop(1.0, darker(headerbar_color, 13)));
@@ -37,6 +40,18 @@ QRect AdwaitaDecorationStyle::closeButtonRect(const QRect &rect) const
 	int size = buttonSize(rect);
 	return QRect(rect.width() - 1 - size - button_padding,
 	             rect.height() - 1 - size - button_padding, size, size);
+}
+
+QRect AdwaitaDecorationStyle::maximizeButtonRect(const QRect &rect) const
+{
+	QRect r = closeButtonRect(rect);
+	return r.translated(-(r.width() + button_padding), 0);
+}
+
+QRect AdwaitaDecorationStyle::minimizeButtonRect(const QRect &rect) const
+{
+	QRect r = closeButtonRect(rect);
+	return r.translated(-(r.width() + button_padding) * 2, 0);
 }
 
 void AdwaitaDecorationStyle::drawBackground(QPainter *painter, State mode,
@@ -95,6 +110,39 @@ void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, State mode,
 	painter->save();
 	QRectF button_rect = closeButtonRect(rect);
 	button_rect.adjust(0.5, 0.5, -0.5, -0.5);
+	drawButtonBackground(painter, mode, button_rect);
+	drawButtonIcon(painter, mode, button_rect, m_close_button_icon);
+	painter->restore();
+}
+
+void AdwaitaDecorationStyle::drawMaximizeButton(QPainter *painter,
+                                                DecorationStyle::State mode,
+                                                const QRect &rect)
+{
+	painter->save();
+	QRectF button_rect = maximizeButtonRect(rect);
+	button_rect.adjust(0.5, 0.5, -0.5, -0.5);
+	drawButtonBackground(painter, mode, button_rect);
+	drawButtonIcon(painter, mode, button_rect, m_maximize_button_icon);
+	painter->restore();
+}
+
+void AdwaitaDecorationStyle::drawMinimizeButton(QPainter *painter,
+                                                DecorationStyle::State mode,
+                                                const QRect &rect)
+{
+	painter->save();
+	QRectF button_rect = minimizeButtonRect(rect);
+	button_rect.adjust(0.5, 0.5, -0.5, -0.5);
+	drawButtonBackground(painter, mode, button_rect);
+	drawButtonIcon(painter, mode, button_rect, m_minimize_button_icon);
+	painter->restore();
+}
+
+void AdwaitaDecorationStyle::drawButtonBackground(QPainter *painter,
+                                                  DecorationStyle::State mode,
+                                                  const QRectF &button_rect)
+{
 	if (mode == State::HOVER) {
 		QLinearGradient gradient(0, button_rect.y(), 0,
 		                         button_rect.y() + button_rect.height());
@@ -109,19 +157,24 @@ void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, State mode,
 		painter->drawRoundedRect(button_rect, button_border_radius,
 		                         button_border_radius, Qt::AbsoluteSize);
 	}
+}
 
-	int size = buttonSize(rect);
+void AdwaitaDecorationStyle::drawButtonIcon(QPainter *painter,
+                                            DecorationStyle::State mode,
+                                            const QRectF &button_rect,
+                                            QIcon &icon)
+{
+	int size = button_rect.height();
 	QRect icon_rect(button_rect.x() + size / 2 - 8,
 	                button_rect.y() + size / 2 - 8, 16, 16);
 
 	if (mode == State::INACTIVE) {
-		m_close_button_icon.paint(painter, icon_rect, Qt::AlignCenter,
-		                          QIcon::Disabled, QIcon::On);
+		icon.paint(painter, icon_rect, Qt::AlignCenter, QIcon::Disabled,
+		           QIcon::On);
 	} else {
-		m_close_button_icon.paint(painter, icon_rect, Qt::AlignCenter,
-		                          QIcon::Active, QIcon::On);
+		icon.paint(painter, icon_rect, Qt::AlignCenter, QIcon::Active,
+		           QIcon::On);
 	}
-	painter->restore();
 }
 
 void AdwaitaDecorationStyle::drawShadow(QPainter *painter,
@@ -180,7 +233,7 @@ void AdwaitaDecorationStyle::updateGradient(const QRect &rect)
 	m_gradient_stops[1].first = 1.0 - stop;
 }
 
-int AdwaitaDecorationStyle::buttonSize(const QRect &rect) const
+int AdwaitaDecorationStyle::buttonSize(const QRect &titlebar_rect) const
 {
-	return rect.height() - 2 - button_padding * 2;
+	return titlebar_rect.height() - 2 - button_padding * 2;
 }
