@@ -51,57 +51,87 @@ AdwaitaDecoration::AdwaitaDecoration() {}
 
 QRectF AdwaitaDecoration::closeButtonRect() const
 {
-	return m_style.closeButtonRect(
-	    QRect(margins().left() - 1, 0,
-	          window()->frameGeometry().width() - margins().right() + 1,
-	          m_style.height()));
+	return m_style.closeButtonRect(titlebarRect().toRect());
 }
-
 QRectF AdwaitaDecoration::maximizeButtonRect() const
 {
-	return m_style.maximizeButtonRect(
-	    QRect(margins().left() - 1, 0,
-	          window()->frameGeometry().width() - margins().right() + 1,
-	          m_style.height()));
+	return m_style.maximizeButtonRect(titlebarRect().toRect());
 }
-
 QRectF AdwaitaDecoration::minimizeButtonRect() const
 {
-	return m_style.minimizeButtonRect(
-	    QRect(margins().left() - 1, 0,
-	          window()->frameGeometry().width() - margins().right() + 1,
-	          m_style.height()));
+	return m_style.minimizeButtonRect(titlebarRect().toRect());
+}
+QRectF AdwaitaDecoration::leftBorderRect() const
+{
+	return QRectF(
+	    0, margins().top(), margins().left(),
+	    m_surface_rect.height() - margins().top() - margins().bottom());
+}
+
+QRectF AdwaitaDecoration::rightBorderRect() const
+{
+	return QRectF(
+	    m_surface_rect.width() - margins().right(), margins().top(),
+	    margins().right(),
+	    m_surface_rect.height() - margins().top() - margins().bottom());
+}
+
+QRectF AdwaitaDecoration::bottomBorderRect() const
+{
+	return QRectF(titlebarRect().x(),
+	              m_surface_rect.height() - margins().bottom(),
+	              titlebarRect().width(), margins().bottom());
+}
+
+QRectF AdwaitaDecoration::titlebarRect() const
+{
+	return QRectF(margins().left() - 1, margins().top() - m_style.height(),
+	              m_surface_rect.width() - (margins().left() - 1) -
+	                  (margins().right() - 1),
+	              m_style.height());
+}
+QRectF AdwaitaDecoration::topLeftCornerRect() const
+{
+	return QRectF(0, 0, margins().left() + titlebarRect().height() / 2,
+	              margins().top() - titlebarRect().height() / 2);
+}
+
+QRectF AdwaitaDecoration::topRightCornerRect() const
+{
+	return QRectF(
+	    window()->width() + margins().left() - titlebarRect().height() / 2, 0,
+	    margins().right() + titlebarRect().height() / 2,
+	    margins().top() - titlebarRect().height() / 2);
+}
+
+QRectF AdwaitaDecoration::bottomLeftCornerRect() const
+{
+	return QRectF(
+	    0, window()->height() + margins().top() - titlebarRect().height() / 2,
+	    margins().left() + titlebarRect().height() / 2,
+	    margins().top() - titlebarRect().height() / 2);
+}
+
+QRectF AdwaitaDecoration::bottomRightCornerRect() const
+{
+	return QRectF(
+	    window()->width() + margins().left() - titlebarRect().height() / 2,
+	    window()->height() + margins().top() - titlebarRect().height() / 2,
+	    margins().right() + titlebarRect().height() / 2,
+	    margins().top() - titlebarRect().height() / 2);
 }
 
 QMargins AdwaitaDecoration::margins() const
 {
-	int margin;
-	if (waylandWindow()->isMaximized()) {
-		margin = 0;
-	} else {
-		margin = 3;
-	}
-	return QMargins(margin, m_style.height(), margin, margin);
+	int margin = waylandWindow()->isMaximized() ? 16 : 16;
+	return QMargins(margin, margin + m_style.height(), margin, margin);
 }
 
 void AdwaitaDecoration::paint(QPaintDevice *device)
 {
-	QRect surface_rect(QPoint(), window()->frameGeometry().size());
-	QRect titlebar_rect(
-	    margins().left() - 1, 0,
-	    surface_rect.width() - (margins().left() - 1) - (margins().right() - 1),
-	    margins().top());
-	QRect left_border_rect(
-	    0, titlebar_rect.height(), margins().left(),
-	    surface_rect.height() - titlebar_rect.height() - margins().bottom());
-	QRect right_border_rect(
-	    surface_rect.width() - margins().right(), titlebar_rect.height(),
-	    margins().right(),
-	    surface_rect.height() - titlebar_rect.height() - margins().bottom());
-	QRect bottom_border_rect(titlebar_rect.x(),
-	                         surface_rect.height() - margins().bottom(),
-	                         titlebar_rect.width(), margins().bottom());
-
+	m_surface_rect =
+	    QRect(QPoint(window()->frameGeometry().x(), window()->geometry().y()),
+	          window()->frameGeometry().size());
 	auto mode = DecorationStyle::State::INACTIVE;
 
 	if (window()->isActive()) {
@@ -111,8 +141,9 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 	QPainter painter(device);
 	painter.setRenderHint(QPainter::Antialiasing);
 
-	m_style.drawBackground(&painter, mode, titlebar_rect);
-	m_style.drawTitle(&painter, mode, titlebar_rect, window()->title());
+	m_style.drawBackground(&painter, mode, titlebarRect().toRect());
+	m_style.drawTitle(&painter, mode, titlebarRect().toRect(),
+	                  window()->title());
 
 	auto close_button_mode = DecorationStyle::State::ACTIVE;
 	auto minimize_button_mode = DecorationStyle::State::ACTIVE;
@@ -138,13 +169,16 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 		    DecorationStyle::State::INACTIVE;
 	}
 
-	m_style.drawCloseButton(&painter, close_button_mode, titlebar_rect);
-	m_style.drawMaximizeButton(&painter, maximize_button_mode, titlebar_rect);
-	m_style.drawMinimizeButton(&painter, minimize_button_mode, titlebar_rect);
+	m_style.drawCloseButton(&painter, close_button_mode,
+	                        titlebarRect().toRect());
+	m_style.drawMaximizeButton(&painter, maximize_button_mode,
+	                           titlebarRect().toRect());
+	m_style.drawMinimizeButton(&painter, minimize_button_mode,
+	                           titlebarRect().toRect());
 
-	m_style.drawLeftBorder(&painter, mode, left_border_rect);
-	m_style.drawRightBorder(&painter, mode, right_border_rect);
-	m_style.drawBottomBorder(&painter, mode, bottom_border_rect);
+	m_style.drawLeftBorder(&painter, mode, leftBorderRect().toRect());
+	m_style.drawRightBorder(&painter, mode, rightBorderRect().toRect());
+	m_style.drawBottomBorder(&painter, mode, bottomBorderRect().toRect());
 }
 
 bool AdwaitaDecoration::clickButton(Qt::MouseButtons b, Button btn)
@@ -175,50 +209,13 @@ bool AdwaitaDecoration::handleMouse(QWaylandInputDevice *inputDevice,
 	bool handled = false;
 	Button hover_old = m_hover;
 	Button clicking_old = m_clicking;
-	// Figure out what area mouse is in
-	if (closeButtonRect().contains(local)) {
-		if (clickButton(b, Close)) {
-			QWindowSystemInterface::handleCloseEvent(window());
-		}
+
+	if (handleWindowButtons(inputDevice, local, b, mods)) {
 		handled = true;
-	} else if (maximizeButtonRect().contains(local)) {
-		if (clickButton(b, Maximize)) {
-			window()->setWindowState(waylandWindow()->isMaximized()
-			                             ? Qt::WindowNoState
-			                             : Qt::WindowMaximized);
-		}
-		handled = true;
-	} else if (minimizeButtonRect().contains(local)) {
-		if (clickButton(b, Minimize)) {
-			window()->setWindowState(Qt::WindowMinimized);
-		}
-		handled = true;
-	} else if (local.y() <= margins().top()) {
-		processMouseTop(inputDevice, local, b, mods);
-		handled = true;
-		m_hover = None;
-		m_clicking = None;
-	} else if (local.y() > window()->height() + margins().top()) {
-		processMouseBottom(inputDevice, local, b, mods);
-		handled = true;
-		m_hover = None;
-		m_clicking = None;
-	} else if (local.x() <= margins().left()) {
-		processMouseLeft(inputDevice, local, b, mods);
-		handled = true;
-		m_hover = None;
-		m_clicking = None;
-	} else if (local.x() > window()->width() + margins().left()) {
-		processMouseRight(inputDevice, local, b, mods);
-		handled = true;
-		m_hover = None;
-		m_clicking = None;
 	} else {
-#if QT_CONFIG(cursor)
-		waylandWindow()->restoreMouseCursor(inputDevice);
-#endif
 		m_hover = None;
 		m_clicking = None;
+		handled = moveAndResizeWindow(inputDevice, local, b, mods);
 	}
 
 	setMouseButtons(b);
@@ -241,105 +238,96 @@ bool AdwaitaDecoration::handleTouch(QWaylandInputDevice *inputDevice,
 	if (handled) {
 		if (closeButtonRect().contains(local))
 			QWindowSystemInterface::handleCloseEvent(window());
-		else if (maximizeButtonRect().contains(local))
+		else if (maximizeButtonRect().contains(local)) {
 			window()->setWindowState(waylandWindow()->isMaximized()
 			                             ? Qt::WindowNoState
 			                             : Qt::WindowMaximized);
-		else if (minimizeButtonRect().contains(local))
+		} else if (minimizeButtonRect().contains(local)) {
 			window()->setWindowState(Qt::WindowMinimized);
-		else if (local.y() <= margins().top())
+		} else if (local.y() <= margins().top()) {
 			waylandWindow()->shellSurface()->move(inputDevice);
-		else
+		} else {
 			handled = false;
+		}
 	}
 	return handled;
 }
 
-void AdwaitaDecoration::processMouseTop(QWaylandInputDevice *inputDevice,
-                                        const QPointF &local,
-                                        Qt::MouseButtons b,
-                                        Qt::KeyboardModifiers mods)
+bool AdwaitaDecoration::moveAndResizeWindow(QWaylandInputDevice *inputDevice,
+                                            const QPointF &local,
+                                            Qt::MouseButtons b,
+                                            Qt::KeyboardModifiers mods)
 {
-	Q_UNUSED(mods);
-	if (local.y() <= margins().bottom()) {
-		if (local.x() <= margins().left()) {
-			// top left bit
-#if QT_CONFIG(cursor)
-			waylandWindow()->setMouseCursor(inputDevice, Qt::SizeFDiagCursor);
-#endif
-			startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_TOP_LEFT, b);
-		} else if (local.x() > window()->width() + margins().left()) {
-			// top right bit
-#if QT_CONFIG(cursor)
-			waylandWindow()->setMouseCursor(inputDevice, Qt::SizeBDiagCursor);
-#endif
-			startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_TOP_RIGHT, b);
-		} else {
-			// top reszie bit
-#if QT_CONFIG(cursor)
-			waylandWindow()->setMouseCursor(inputDevice, Qt::SplitVCursor);
-#endif
-			startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_TOP, b);
-		}
-	} else {
-#if QT_CONFIG(cursor)
+	bool handled = false;
+	if (titlebarRect().contains(local)) {
 		waylandWindow()->restoreMouseCursor(inputDevice);
-#endif
 		startMove(inputDevice, b);
-	}
-}
-
-void AdwaitaDecoration::processMouseBottom(QWaylandInputDevice *inputDevice,
-                                           const QPointF &local,
-                                           Qt::MouseButtons b,
-                                           Qt::KeyboardModifiers mods)
-{
-	Q_UNUSED(mods);
-	if (local.x() <= margins().left()) {
-		// bottom left bit
-#if QT_CONFIG(cursor)
-		waylandWindow()->setMouseCursor(inputDevice, Qt::SizeBDiagCursor);
-#endif
-		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT, b);
-	} else if (local.x() > window()->width() + margins().left()) {
-		// bottom right bit
-#if QT_CONFIG(cursor)
+		handled = true;
+	} else if (topLeftCornerRect().contains(local)) {
 		waylandWindow()->setMouseCursor(inputDevice, Qt::SizeFDiagCursor);
-#endif
+		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_TOP_LEFT, b);
+		handled = true;
+	} else if (topRightCornerRect().contains(local)) {
+		waylandWindow()->setMouseCursor(inputDevice, Qt::SizeBDiagCursor);
+		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_TOP_RIGHT, b);
+		handled = true;
+	} else if (bottomLeftCornerRect().contains(local)) {
+		waylandWindow()->setMouseCursor(inputDevice, Qt::SizeBDiagCursor);
+		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT, b);
+		handled = true;
+	} else if (bottomRightCornerRect().contains(local)) {
+		waylandWindow()->setMouseCursor(inputDevice, Qt::SizeFDiagCursor);
 		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT, b);
+		handled = true;
+	} else if (local.x() <= margins().left()) {
+		waylandWindow()->setMouseCursor(inputDevice, Qt::SplitHCursor);
+		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_LEFT, b);
+		handled = true;
+	} else if (local.x() >= window()->width() + margins().left()) {
+		waylandWindow()->setMouseCursor(inputDevice, Qt::SplitHCursor);
+		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_RIGHT, b);
+		handled = true;
 	} else {
-		// bottom bit
-#if QT_CONFIG(cursor)
-		waylandWindow()->setMouseCursor(inputDevice, Qt::SplitVCursor);
-#endif
-		startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_BOTTOM, b);
+		if (local.y() <= (margins().top() - titlebarRect().height())) {
+			waylandWindow()->setMouseCursor(inputDevice, Qt::SplitVCursor);
+			startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_TOP, b);
+			handled = true;
+		} else if (local.y() >= window()->height() + margins().top()) {
+			waylandWindow()->setMouseCursor(inputDevice, Qt::SplitVCursor);
+			startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_BOTTOM, b);
+			handled = true;
+		} else {
+			waylandWindow()->restoreMouseCursor(inputDevice);
+		}
 	}
+	return handled;
 }
 
-void AdwaitaDecoration::processMouseLeft(QWaylandInputDevice *inputDevice,
-                                         const QPointF &local,
-                                         Qt::MouseButtons b,
-                                         Qt::KeyboardModifiers mods)
+bool AdwaitaDecoration::handleWindowButtons(QWaylandInputDevice *inputDevice,
+                                            const QPointF &local,
+                                            Qt::MouseButtons b,
+                                            Qt::KeyboardModifiers mods)
 {
-	Q_UNUSED(local);
-	Q_UNUSED(mods);
-#if QT_CONFIG(cursor)
-	waylandWindow()->setMouseCursor(inputDevice, Qt::SplitHCursor);
-#endif
-	startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_LEFT, b);
-}
-
-void AdwaitaDecoration::processMouseRight(QWaylandInputDevice *inputDevice,
-                                          const QPointF &local,
-                                          Qt::MouseButtons b,
-                                          Qt::KeyboardModifiers mods)
-{
-	Q_UNUSED(local);
-	Q_UNUSED(mods);
-#if QT_CONFIG(cursor)
-	waylandWindow()->setMouseCursor(inputDevice, Qt::SplitHCursor);
-#endif
-	startResize(inputDevice, WL_SHELL_SURFACE_RESIZE_RIGHT, b);
+	bool handled = false;
+	if (closeButtonRect().contains(local)) {
+		if (clickButton(b, Close)) {
+			QWindowSystemInterface::handleCloseEvent(window());
+		}
+		handled = true;
+	} else if (maximizeButtonRect().contains(local)) {
+		if (clickButton(b, Maximize)) {
+			window()->setWindowState(waylandWindow()->isMaximized()
+			                             ? Qt::WindowNoState
+			                             : Qt::WindowMaximized);
+		}
+		handled = true;
+	} else if (minimizeButtonRect().contains(local)) {
+		if (clickButton(b, Minimize)) {
+			window()->setWindowState(Qt::WindowMinimized);
+		}
+		handled = true;
+	}
+	return handled;
 }
 
 QT_END_NAMESPACE

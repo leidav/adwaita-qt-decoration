@@ -72,18 +72,24 @@ protected:
 	                 Qt::KeyboardModifiers mods) override;
 
 private:
-	void processMouseTop(QWaylandInputDevice *inputDevice, const QPointF &local,
-	                     Qt::MouseButtons b, Qt::KeyboardModifiers mods);
-	void processMouseBottom(QWaylandInputDevice *inputDevice,
-	                        const QPointF &local, Qt::MouseButtons b,
-	                        Qt::KeyboardModifiers mods);
-	void processMouseLeft(QWaylandInputDevice *inputDevice,
-	                      const QPointF &local, Qt::MouseButtons b,
-	                      Qt::KeyboardModifiers mods);
-	void processMouseRight(QWaylandInputDevice *inputDevice,
-	                       const QPointF &local, Qt::MouseButtons b,
-	                       Qt::KeyboardModifiers mods);
+	bool moveAndResizeWindow(QWaylandInputDevice *inputDevice,
+	                         const QPointF &local, Qt::MouseButtons b,
+	                         Qt::KeyboardModifiers mods);
+	bool handleWindowButtons(QWaylandInputDevice *inputDevice,
+	                         const QPointF &local, Qt::MouseButtons b,
+	                         Qt::KeyboardModifiers mods);
+
 	bool clickButton(Qt::MouseButtons b, Button btn);
+
+	QRectF topLeftCornerRect() const;
+	QRectF topRightCornerRect() const;
+	QRectF bottomLeftCornerRect() const;
+	QRectF bottomRightCornerRect() const;
+
+	QRectF titlebarRect() const;
+	QRectF leftBorderRect() const;
+	QRectF rightBorderRect() const;
+	QRectF bottomBorderRect() const;
 
 	QRectF closeButtonRect() const;
 	QRectF maximizeButtonRect() const;
@@ -91,6 +97,7 @@ private:
 
 	Button m_clicking = None;
 	Button m_hover = None;
+	QRect m_surface_rect;
 	AdwaitaDecorationStyle m_style;
 };
 };  // namespace QtWaylandClient

@@ -39,8 +39,9 @@ QFont AdwaitaDecorationStyle::titleFont() const
 QRect AdwaitaDecorationStyle::closeButtonRect(const QRect &rect) const
 {
 	int size = buttonSize(rect);
-	return QRect(rect.width() - 1 - size - button_padding,
-	             rect.height() - 1 - size - button_padding, size, size);
+	return QRect(rect.x() + rect.width() - 1 - size - button_padding,
+	             rect.y() + rect.height() - 1 - size - button_padding, size,
+	             size);
 }
 
 QRect AdwaitaDecorationStyle::maximizeButtonRect(const QRect &rect) const
@@ -61,7 +62,8 @@ void AdwaitaDecorationStyle::drawBackground(QPainter *painter, State mode,
 	painter->save();
 	updateGradient(rect);
 	if (mode == State::ACTIVE) {
-		QLinearGradient gradient(0, 1, 0, rect.height() - 1);
+		QLinearGradient gradient(0, rect.y() + 1, 0,
+		                         rect.y() + rect.height() - 1);
 		gradient.setStops(m_gradient_stops);
 		painter->setPen(border_color);
 		painter->setBrush(gradient);
