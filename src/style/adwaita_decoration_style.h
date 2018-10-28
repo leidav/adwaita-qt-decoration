@@ -6,22 +6,22 @@
 
 #include "helper.h"
 
-enum AdwaitaColors {
-	base_color = 0xFFFFFF,
-	text_color = 0x0,
-	bg_color = 0xE8E8E7,
-	fg_color = 0x2E3436,
+constexpr unsigned int base_color = 0xFFFFFF;
+constexpr unsigned int text_color = 0x0;
+constexpr unsigned int bg_color = 0xE8E8E7;
+constexpr unsigned int fg_color = 0x2E3436;
 
-	headerbar_color = lighter(bg_color, 5),
-	headerbar_inactive_color = 0xe9e9e8,
-	bottom_line_inactive_color = 0xc1c1be,
-	text_inactive_color = 0x8c8f90,
-	button_press_color = 0xdadad8,
-	highlight_color = 0xfdfdfd,
-	border_color = 0xa2a2a2,
-	bottom_line_color = 0x929292,
-
-};
+constexpr unsigned int headerbar_color = lighter(bg_color, 5);
+constexpr unsigned int headerbar_inactive_color = 0xe9e9e8;
+constexpr unsigned int bottom_line_inactive_color = 0xc1c1be;
+constexpr unsigned int text_inactive_color = 0x8c8f90;
+constexpr unsigned int button_press_color = 0xdadad8;
+constexpr unsigned int highlight_color = 0xfdfdfd;
+constexpr unsigned int border_color = 0xa2a2a2;
+constexpr unsigned int bottom_line_color = 0x929292;
+constexpr unsigned int button_border_color = 0xb7b7b4;
+constexpr unsigned int button_gradient_start_color = 0xf7f7f6;
+constexpr unsigned int button_gradient_stop_color = 0xdfdfde;
 
 enum AdwaitaMetrics {
 	font_size = 11,

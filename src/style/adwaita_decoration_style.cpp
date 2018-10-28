@@ -16,9 +16,10 @@ AdwaitaDecorationStyle::AdwaitaDecorationStyle()
 	m_gradient_stops.append(QGradientStop(0.9, headerbar_color));
 	m_gradient_stops.append(QGradientStop(1.0, darker(headerbar_color, 13)));
 
-	m_button_gradient_stops.append(QGradientStop(0.0, highlight_color));
-	m_button_gradient_stops.append(QGradientStop(0.1, QColor(0xf7f7f6)));
-	m_button_gradient_stops.append(QGradientStop(1.0, QColor(0xdfdfde)));
+	m_button_gradient_stops.append(
+	    QGradientStop(0.0, button_gradient_start_color));
+	m_button_gradient_stops.append(
+	    QGradientStop(1.0, button_gradient_stop_color));
 
 	QFontMetrics metric(m_font);
 	m_height = qMax(metric.height() + static_cast<int>(font_padding_y) * 2,
@@ -80,13 +81,15 @@ void AdwaitaDecorationStyle::drawBackground(QPainter *painter, State mode,
 	} else {
 		painter->setPen(bottom_line_inactive_color);
 	}
-	painter->drawLine(QPointF(0.5, rect.height() - 0.5),
-	                  QPointF(rect.width() - 0.5, rect.height() - 0.5));
+	painter->drawLine(
+	    QPointF(rect.x() + 0.5, rect.y() + rect.height() - 0.5),
+	    QPointF(rect.x() + rect.width() - 0.5, rect.y() + rect.height() - 0.5));
 
 	painter->setPen(highlight_color);
 	painter->drawLine(
-	    QPointF(titlebar_border_radius + 0.5, 1.5),
-	    QPointF(rect.width() - 0.5 - titlebar_border_radius, 1.5));
+	    QPointF(rect.x() + titlebar_border_radius + 0.5, rect.y() + 1 + 0.5),
+	    QPointF(rect.x() + rect.width() - 0.5 - titlebar_border_radius,
+	            rect.y() + 1 + 0.5));
 	painter->restore();
 }
 
@@ -148,12 +151,19 @@ void AdwaitaDecorationStyle::drawButtonBackground(QPainter *painter,
 		                         button_rect.y() + button_rect.height());
 		gradient.setStops(m_button_gradient_stops);
 		painter->setBrush(gradient);
-		painter->setPen(QColor(0xb7b7b4));
+		painter->setPen(QColor(button_border_color));
 		painter->drawRoundedRect(button_rect, button_border_radius,
 		                         button_border_radius, Qt::AbsoluteSize);
+
+		painter->setPen(highlight_color);
+		painter->drawLine(QPointF(button_rect.x() + button_border_radius + 1,
+		                          button_rect.y() + 1),
+		                  QPointF(button_rect.x() + button_rect.width() -
+		                              button_border_radius - 1,
+		                          button_rect.y() + 1));
 	} else if (mode == State::PRESS) {
 		painter->setBrush(QColor(button_press_color));
-		painter->setPen(QColor(0xb7b7b4));
+		painter->setPen(QColor(button_border_color));
 		painter->drawRoundedRect(button_rect, button_border_radius,
 		                         button_border_radius, Qt::AbsoluteSize);
 	}

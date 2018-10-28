@@ -2,6 +2,12 @@
 #define HELPER_H
 #include <algorithm>
 
+constexpr unsigned int transparentize(unsigned int color, double percentage)
+{
+	unsigned int alpha = static_cast<unsigned int>(255.0 * percentage / 100)
+	                     << 24;
+	return (color & 0x00FFFFFF) | alpha;
+}
 constexpr unsigned int lighter(unsigned int color, double percentage)
 {
 	double f = 1.0 + percentage / 100;
