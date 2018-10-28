@@ -59,8 +59,8 @@ public:
 
 	void drawCloseButton(QPainter *painter, State mode,
 	                     const QRect &rect) override;
-	void drawMaximizeButton(QPainter *painter, State mode,
-	                        const QRect &rect) override;
+	void drawMaximizeButton(QPainter *painter, State mode, const QRect &rect,
+	                        bool window_maximized = false) override;
 	void drawMinimizeButton(QPainter *painter, State mode,
 	                        const QRect &rect) override;
 
@@ -90,6 +90,7 @@ private:
 	QIcon m_close_button_icon;
 	QIcon m_minimize_button_icon;
 	QIcon m_maximize_button_icon;
+	QIcon m_maximize_button_icon_restore;
 };
 
 #endif  // ADWAITADECORATIONSTYLE_H

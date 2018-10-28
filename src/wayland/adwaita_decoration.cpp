@@ -172,7 +172,8 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 	m_style.drawCloseButton(&painter, close_button_mode,
 	                        titlebarRect().toRect());
 	m_style.drawMaximizeButton(&painter, maximize_button_mode,
-	                           titlebarRect().toRect());
+	                           titlebarRect().toRect(),
+	                           waylandWindow()->isMaximized());
 	m_style.drawMinimizeButton(&painter, minimize_button_mode,
 	                           titlebarRect().toRect());
 

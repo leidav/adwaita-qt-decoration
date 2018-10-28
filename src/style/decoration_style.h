@@ -27,7 +27,8 @@ public:
 	virtual void drawCloseButton(QPainter *painter, State mode,
 	                             const QRect &rect) = 0;
 	virtual void drawMaximizeButton(QPainter *painter, State mode,
-	                                const QRect &rect) = 0;
+	                                const QRect &rect,
+	                                bool window_maximized = false) = 0;
 	virtual void drawMinimizeButton(QPainter *painter, State mode,
 	                                const QRect &rect) = 0;
 

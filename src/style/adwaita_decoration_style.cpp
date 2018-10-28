@@ -11,6 +11,8 @@ AdwaitaDecorationStyle::AdwaitaDecorationStyle()
 	m_close_button_icon = QIcon::fromTheme("window-close-symbolic");
 	m_minimize_button_icon = QIcon::fromTheme("window-minimize-symbolic");
 	m_maximize_button_icon = QIcon::fromTheme("window-maximize-symbolic");
+	m_maximize_button_icon_restore =
+	    QIcon::fromTheme("window-restore-symbolic");
 
 	m_gradient_stops.append(QGradientStop(0.0, headerbar_color));
 	m_gradient_stops.append(QGradientStop(0.9, headerbar_color));
@@ -122,13 +124,19 @@ void AdwaitaDecorationStyle::drawCloseButton(QPainter *painter, State mode,
 
 void AdwaitaDecorationStyle::drawMaximizeButton(QPainter *painter,
                                                 DecorationStyle::State mode,
-                                                const QRect &rect)
+                                                const QRect &rect,
+                                                bool window_maximized)
 {
 	painter->save();
 	QRectF button_rect = maximizeButtonRect(rect);
 	button_rect.adjust(0.5, 0.5, -0.5, -0.5);
 	drawButtonBackground(painter, mode, button_rect);
-	drawButtonIcon(painter, mode, button_rect, m_maximize_button_icon);
+	if (window_maximized) {
+		drawButtonIcon(painter, mode, button_rect,
+		               m_maximize_button_icon_restore);
+	} else {
+		drawButtonIcon(painter, mode, button_rect, m_maximize_button_icon);
+	}
 	painter->restore();
 }
 
