@@ -296,9 +296,8 @@ void AdwaitaDecorationStyle::drawShadow(QPainter *painter,
 	// right
 	painter->drawTiledPixmap(
 	    QRectF(rect.x() + rect.width() - tilesize - inner_offset,
-	           rect.y() + tilesize + inner_offset,
-	           tilesize + vertical_shadow_offset,
-	           rect.height() - (tilesize + inner_offset) * 2),
+	           rect.y() + tilesize + inner_offset + vertical_shadow_offset,
+	           tilesize, rect.height() - (tilesize + inner_offset) * 2),
 	    m_shadow_right);
 	painter->restore();
 }
