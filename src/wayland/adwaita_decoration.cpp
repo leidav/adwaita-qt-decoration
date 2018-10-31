@@ -129,9 +129,7 @@ QMargins AdwaitaDecoration::margins() const
 
 void AdwaitaDecoration::paint(QPaintDevice *device)
 {
-	m_surface_rect =
-	    QRect(QPoint(window()->frameGeometry().x(), window()->geometry().y()),
-	          window()->frameGeometry().size());
+	m_surface_rect = QRect(QPoint(0, 0), window()->frameGeometry().size());
 	auto mode = DecorationStyle::State::INACTIVE;
 
 	if (window()->isActive()) {
@@ -141,6 +139,7 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 	QPainter painter(device);
 	painter.setRenderHint(QPainter::Antialiasing);
 
+	m_style.drawShadow(&painter, mode, m_surface_rect);
 	m_style.drawBackground(&painter, mode, titlebarRect().toRect());
 	m_style.drawTitle(&painter, mode, titlebarRect().toRect(),
 	                  window()->title());

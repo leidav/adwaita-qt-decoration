@@ -33,7 +33,9 @@ enum AdwaitaMetrics {
 	font_padding_y = 6,
 	font_padding_x = 12,
 	button_padding = 4,
-	gradient_bottom_distance = 3
+	gradient_bottom_distance = 3,
+	shadow_radius = 7,
+	vertical_shadow_offset = 2
 };
 
 class AdwaitaDecorationStyle : public DecorationStyle
@@ -82,6 +84,8 @@ private:
 	void updateGradient(const QRect &rect);
 	int buttonSize(const QRect &titlebar_rect) const;
 
+	void createShadowPixmaps(int width, int height, int blur_radius);
+
 	int m_height;
 	QRect m_buttonRect;
 	QFont m_font;
@@ -91,6 +95,11 @@ private:
 	QIcon m_minimize_button_icon;
 	QIcon m_maximize_button_icon;
 	QIcon m_maximize_button_icon_restore;
+	QPixmap m_shadow;
+	QPixmap m_shadow_top;
+	QPixmap m_shadow_bottom;
+	QPixmap m_shadow_left;
+	QPixmap m_shadow_right;
 };
 
 #endif  // ADWAITADECORATIONSTYLE_H

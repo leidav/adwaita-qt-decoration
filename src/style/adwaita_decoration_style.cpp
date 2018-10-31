@@ -1,5 +1,37 @@
 #include "adwaita_decoration_style.h"
 #include <QIcon>
+#include <cmath>
+
+int kernelSize(int radius)
+{
+	// https://github.com/GNOME/mutter/blob/gnome-3-30/src/compositor/meta-shadow-factory.c
+	// return static_cast<int>(0.5 + radius * (0.75 * std::sqrt(2 * M_PI)));
+	return radius * 2 + 1;
+	// return static_cast<int>(0.5 + radius * (0.75 * sqrt(2 * M_PI)));
+}
+
+static void horizontalBoxBlur(uint8_t out[], const uint8_t in[], int width,
+                              int height, int radius)
+{
+	int kernelsize = kernelSize(radius);
+	uint8_t *output = &out[3];
+	for (int y = 0; y < height; y++) {
+		const uint8_t *input_line = &in[y * width * 4 + 3];
+
+		int sum = 0;
+		for (int i = 0; i < kernelsize; i++) {
+			sum += input_line[i * 4];
+		}
+		output[(radius * height + y) * 4] =
+		    static_cast<uint8_t>(sum / kernelsize);
+		for (int x = radius + 1; x < width - radius; x++) {
+			sum = sum - input_line[(x - radius - 1) * 4] +
+			      input_line[(x + radius) * 4];
+			output[(x * height + y) * 4] =
+			    static_cast<uint8_t>(sum / kernelsize);
+		}
+	}
+}
 
 AdwaitaDecorationStyle::AdwaitaDecorationStyle()
     : m_height(min_height_with_border),
@@ -26,6 +58,8 @@ AdwaitaDecorationStyle::AdwaitaDecorationStyle()
 	QFontMetrics metric(m_font);
 	m_height = qMax(metric.height() + static_cast<int>(font_padding_y) * 2,
 	                static_cast<int>(min_height_with_border));
+	int kernelsize = kernelSize(shadow_radius);
+	createShadowPixmaps(kernelsize * 8, kernelsize * 8, shadow_radius);
 }
 
 int AdwaitaDecorationStyle::height() const
@@ -202,10 +236,70 @@ void AdwaitaDecorationStyle::drawShadow(QPainter *painter,
                                         const QRect &rect)
 {
 	painter->save();
-	QLinearGradient gradient(0, 0, 0, rect.height());
-	gradient.setStops(m_gradient_stops);
-	painter->setPen(border_color);
-	painter->setBrush(gradient);
+	int kernelsize = kernelSize(shadow_radius);
+	int tilesize = kernelsize * 2;
+	int inner_offset = 0;
+	if (mode == DecorationStyle::State::INACTIVE) {
+		inner_offset = 0;
+	}
+	// top left
+	painter->drawPixmap(
+	    QRect(rect.x() + inner_offset,
+	          rect.y() + vertical_shadow_offset + inner_offset, tilesize,
+	          tilesize),
+	    m_shadow, QRect(shadow_radius, shadow_radius, tilesize, tilesize));
+	// top right
+	painter->drawPixmap(QRect(rect.x() + rect.width() - tilesize - inner_offset,
+	                          rect.y() + inner_offset + vertical_shadow_offset,
+	                          tilesize, tilesize),
+	                    m_shadow,
+	                    QRect(m_shadow.width() - tilesize - shadow_radius,
+	                          shadow_radius, tilesize, tilesize));
+	// bottom left
+	painter->drawPixmap(
+	    QRect(rect.x() + inner_offset,
+	          rect.y() + rect.height() - tilesize - inner_offset +
+	              vertical_shadow_offset,
+	          tilesize, tilesize),
+	    m_shadow,
+	    QRect(shadow_radius, m_shadow.height() - tilesize - shadow_radius,
+	          tilesize, tilesize));
+	// bottom right
+	painter->drawPixmap(QRect(rect.x() + rect.width() - tilesize - inner_offset,
+	                          rect.y() + rect.height() - tilesize -
+	                              inner_offset + vertical_shadow_offset,
+	                          tilesize, tilesize),
+	                    m_shadow,
+	                    QRect(m_shadow.width() - tilesize - shadow_radius,
+	                          m_shadow.height() - tilesize - shadow_radius,
+	                          tilesize, tilesize));
+
+	// top
+	painter->drawTiledPixmap(
+	    QRectF(rect.x() + tilesize + inner_offset,
+	           rect.y() + inner_offset + vertical_shadow_offset,
+	           rect.width() - (tilesize + inner_offset) * 2, tilesize),
+	    m_shadow_top);
+	// bottom
+	painter->drawTiledPixmap(
+	    QRectF(rect.x() + tilesize + inner_offset,
+	           rect.y() + rect.height() - tilesize - inner_offset +
+	               vertical_shadow_offset,
+	           rect.width() - (tilesize + inner_offset) * 2, tilesize),
+	    m_shadow_bottom);
+	// left
+	painter->drawTiledPixmap(
+	    QRectF(rect.x() + inner_offset,
+	           rect.y() + tilesize + inner_offset + vertical_shadow_offset,
+	           tilesize, rect.height() - (tilesize + inner_offset) * 2),
+	    m_shadow_left);
+	// right
+	painter->drawTiledPixmap(
+	    QRectF(rect.x() + rect.width() - tilesize - inner_offset,
+	           rect.y() + tilesize + inner_offset,
+	           tilesize + vertical_shadow_offset,
+	           rect.height() - (tilesize + inner_offset) * 2),
+	    m_shadow_right);
 	painter->restore();
 }
 
@@ -256,4 +350,46 @@ void AdwaitaDecorationStyle::updateGradient(const QRect &rect)
 int AdwaitaDecorationStyle::buttonSize(const QRect &titlebar_rect) const
 {
 	return titlebar_rect.height() - 2 - button_padding * 2;
+}
+
+void AdwaitaDecorationStyle::createShadowPixmaps(int width, int height,
+                                                 int blur_radius)
+
+{
+	int kernelsize = kernelSize(blur_radius);
+	QColor color(0, 0, 0, 127);
+
+	QImage img1(width + kernelsize, height + kernelsize,
+	            QImage::Format_ARGB32_Premultiplied);
+	QImage img2(img1.height(), img1.width(), img1.format());
+	img1.fill(Qt::transparent);
+	img2.fill(Qt::transparent);
+	QPainter p(&img1);
+	p.fillRect(kernelsize + blur_radius, kernelsize + blur_radius,
+	           img1.width() - 2 * (kernelsize + blur_radius),
+	           img1.height() - 2 * (kernelsize + blur_radius), color);
+
+	horizontalBoxBlur(img2.scanLine(0), img1.scanLine(0), img1.width(),
+	                  img1.height(), blur_radius);
+	horizontalBoxBlur(img1.scanLine(0), img2.scanLine(0), img2.width(),
+	                  img2.height(), blur_radius);
+	horizontalBoxBlur(img2.scanLine(0), img1.scanLine(0), img1.width(),
+	                  img1.height(), blur_radius);
+	horizontalBoxBlur(img1.scanLine(0), img2.scanLine(0), img2.width(),
+	                  img2.height(), blur_radius);
+	horizontalBoxBlur(img2.scanLine(0), img1.scanLine(0), img1.width(),
+	                  img1.height(), blur_radius);
+	horizontalBoxBlur(img1.scanLine(0), img2.scanLine(0), img2.width(),
+	                  img2.height(), blur_radius);
+	m_shadow = QPixmap::fromImage(img1);
+	m_shadow_top = m_shadow.copy(kernelsize * 3, shadow_radius, kernelsize,
+	                             kernelsize * 2);
+	m_shadow_bottom = m_shadow.copy(
+	    kernelsize * 3, m_shadow.height() - kernelsize * 2 - shadow_radius,
+	    kernelsize, kernelsize * 2);
+	m_shadow_left = m_shadow.copy(shadow_radius, kernelsize * 3, kernelsize * 2,
+	                              kernelsize);
+	m_shadow_right =
+	    m_shadow.copy(m_shadow.width() - kernelsize * 2 - shadow_radius,
+	                  kernelsize * 3, kernelsize * 2, kernelsize);
 }
