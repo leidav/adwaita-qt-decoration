@@ -8,3 +8,6 @@ target_link_libraries(adwaita PRIVATE adwaita_style Qt5::Core Qt5::Gui Qt5::Wayl
 target_include_directories(adwaita PRIVATE ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
 ${Qt5WaylandClient_PRIVATE_INCLUDE_DIRS})
 target_include_directories(adwaita PRIVATE ${PRIVATE_QT_HEADER_DIR})
+
+install(TARGETS adwaita
+	    DESTINATION lib/qt/plugins/wayland-decoration-client)

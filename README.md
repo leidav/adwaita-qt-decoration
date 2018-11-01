@@ -12,6 +12,7 @@ mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=/usr \
  -DPRIVATE_QT_HEADER_DIR="path_to_qtwayland_builtdir/include/QtWaylandClient/5.11.2" ../
+make
 make install
 ```
 ## Usage
