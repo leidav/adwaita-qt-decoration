@@ -13,7 +13,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 set(PRIVATE_QT_HEADER_DIR CACHE STRING "Path to private qt wayland headers")
-option(BUILD_TEST "Build test application" OFF)
+option(BUILD_TEST "Build test application" ON)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/wayland-decoration-client)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
