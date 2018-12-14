@@ -2,7 +2,7 @@
 #include <QIcon>
 #include <cmath>
 
-int kernelSize(int radius)
+static int kernelSize(int radius)
 {
 	// https://github.com/GNOME/mutter/blob/gnome-3-30/src/compositor/meta-shadow-factory.c
 	// return static_cast<int>(0.5 + radius * (0.75 * std::sqrt(2 * M_PI)));
@@ -218,9 +218,10 @@ void AdwaitaDecorationStyle::drawButtonIcon(QPainter *painter,
                                             const QRectF &button_rect,
                                             QIcon &icon)
 {
-	int size = button_rect.height();
-	QRect icon_rect(button_rect.x() + size / 2 - 8,
-	                button_rect.y() + size / 2 - 8, 16, 16);
+	qreal size = button_rect.height();
+	int posx = qRound(button_rect.x() + size / 2 - 8);
+	int posy = qRound(button_rect.y() + size / 2 - 8);
+	QRect icon_rect(posx, posy, 16, 16);
 
 	if (mode == State::INACTIVE) {
 		icon.paint(painter, icon_rect, Qt::AlignCenter, QIcon::Disabled,
