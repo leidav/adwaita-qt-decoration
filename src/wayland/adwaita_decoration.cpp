@@ -258,6 +258,7 @@ bool AdwaitaDecoration::moveAndResizeWindow(QWaylandInputDevice *inputDevice,
                                             Qt::MouseButtons b,
                                             Qt::KeyboardModifiers mods)
 {
+	Q_UNUSED(mods);
 	bool handled = false;
 	if (titlebarRect().contains(local)) {
 		waylandWindow()->restoreMouseCursor(inputDevice);
@@ -308,6 +309,8 @@ bool AdwaitaDecoration::handleWindowButtons(QWaylandInputDevice *inputDevice,
                                             Qt::MouseButtons b,
                                             Qt::KeyboardModifiers mods)
 {
+	Q_UNUSED(inputDevice);
+	Q_UNUSED(mods);
 	bool handled = false;
 	if (closeButtonRect().contains(local)) {
 		if (clickButton(b, Close)) {

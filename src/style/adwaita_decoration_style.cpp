@@ -307,6 +307,7 @@ void AdwaitaDecorationStyle::drawLeftBorder(QPainter *painter,
                                             DecorationStyle::State mode,
                                             const QRect &rect)
 {
+	Q_UNUSED(mode);
 	painter->save();
 	painter->setPen(border_color);
 	QLineF line(rect.x() + rect.width() - 1 + 0.5, rect.y() + 0.5,
@@ -320,6 +321,7 @@ void AdwaitaDecorationStyle::drawRightBorder(QPainter *painter,
                                              DecorationStyle::State mode,
                                              const QRect &rect)
 {
+	Q_UNUSED(mode);
 	painter->save();
 	painter->setPen(border_color);
 	QLineF line(rect.x() + 0.5, rect.y() + 0.5, rect.x() + 0.5,
@@ -332,6 +334,7 @@ void AdwaitaDecorationStyle::drawBottomBorder(QPainter *painter,
                                               DecorationStyle::State mode,
                                               const QRect &rect)
 {
+	Q_UNUSED(mode);
 	painter->save();
 	painter->setPen(border_color);
 	QLineF line(rect.x() + 0.5, rect.y() + 0.5, rect.x() + rect.width() - 0.5,

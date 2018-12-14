@@ -21,6 +21,7 @@ HeaderBar::HeaderBar(DecorationStyle *style, QWidget *parent)
 
 void HeaderBar::paintEvent(QPaintEvent *event)
 {
+	Q_UNUSED(event);
 	auto mode = DecorationStyle::State::INACTIVE;
 	if (window()->isActiveWindow()) {
 		mode = DecorationStyle::State::ACTIVE;
@@ -71,12 +72,14 @@ void HeaderBar::mousePressEvent(QMouseEvent *event)
 
 void HeaderBar::mouseReleaseEvent(QMouseEvent *event)
 {
+	Q_UNUSED(event);
 	m_button_press = false;
 	repaint();
 }
 
 void HeaderBar::leaveEvent(QEvent *event)
 {
+	Q_UNUSED(event);
 	m_button_hover = false;
 	m_button_press = false;
 	repaint();
