@@ -123,16 +123,17 @@ QRectF AdwaitaDecoration::bottomRightCornerRect() const
 
 QMargins AdwaitaDecoration::margins() const
 {
-	int margin = waylandWindow()->isMaximized() ? 16 : 16;
+	int margin = window()->windowState() & Qt::WindowMaximized ? 16 : 16;
 	return QMargins(margin, margin + m_style.height(), margin, margin);
 }
 
 void AdwaitaDecoration::paint(QPaintDevice *device)
 {
 	m_surface_rect = QRect(QPoint(0, 0), window()->frameGeometry().size());
+
 	auto mode = DecorationStyle::State::INACTIVE;
 
-	if (window()->isActive()) {
+	if (window()->handle()->isActive()) {
 		mode = DecorationStyle::State::ACTIVE;
 	}
 
@@ -172,7 +173,7 @@ void AdwaitaDecoration::paint(QPaintDevice *device)
 	                        titlebarRect().toRect());
 	m_style.drawMaximizeButton(&painter, maximize_button_mode,
 	                           titlebarRect().toRect(),
-	                           waylandWindow()->isMaximized());
+	                           window()->windowState() & Qt::WindowMaximized);
 	m_style.drawMinimizeButton(&painter, minimize_button_mode,
 	                           titlebarRect().toRect());
 
@@ -219,8 +220,8 @@ bool AdwaitaDecoration::handleMouse(QWaylandInputDevice *inputDevice,
 	}
 
 	setMouseButtons(b);
-	update();
 	if ((hover_old != m_hover) || (clicking_old != m_clicking)) {
+		update();
 		waylandWindow()->requestUpdate();
 	}
 	return handled;
@@ -239,9 +240,8 @@ bool AdwaitaDecoration::handleTouch(QWaylandInputDevice *inputDevice,
 		if (closeButtonRect().contains(local))
 			QWindowSystemInterface::handleCloseEvent(window());
 		else if (maximizeButtonRect().contains(local)) {
-			window()->setWindowState(waylandWindow()->isMaximized()
-			                             ? Qt::WindowNoState
-			                             : Qt::WindowMaximized);
+			window()->setWindowStates(window()->windowStates() ^
+			                          Qt::WindowMaximized);
 		} else if (minimizeButtonRect().contains(local)) {
 			window()->setWindowState(Qt::WindowMinimized);
 		} else if (local.y() <= margins().top()) {
@@ -316,9 +316,8 @@ bool AdwaitaDecoration::handleWindowButtons(QWaylandInputDevice *inputDevice,
 		handled = true;
 	} else if (maximizeButtonRect().contains(local)) {
 		if (clickButton(b, Maximize)) {
-			window()->setWindowState(waylandWindow()->isMaximized()
-			                             ? Qt::WindowNoState
-			                             : Qt::WindowMaximized);
+			window()->setWindowStates(window()->windowStates() ^
+			                          Qt::WindowMaximized);
 		}
 		handled = true;
 	} else if (minimizeButtonRect().contains(local)) {
